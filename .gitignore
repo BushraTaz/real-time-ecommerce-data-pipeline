@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+
+.env
+
+data_lake/
+dlq/
+
+.vscode/
+.idea/
+
+*.log
