@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-consumer
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-consumer
+  template:
+    metadata:
+      labels:
+        app: ecommerce-consumer
+    spec:
+      containers:
+        - name: ecommerce-consumer
+          image: ecommerce-consumer:1.3
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka:29092"
+
+            - name: POSTGRES_HOST
+              value: "postgres"
+
+            - name: POSTGRES_PORT
+              value: "5432"
+
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: consumer-postgres-secret
+                  key: POSTGRES_DB
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: consumer-postgres-secret
+                  key: POSTGRES_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: consumer-postgres-secret
+                  key: POSTGRES_PASSWORD
+
+          volumeMounts:
+            - name: consumer-data
+              mountPath: /app/data_lake
+
+          livenessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import os; assert os.path.exists('/proc/1')"
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+      volumes:
+        - name: consumer-data
+          persistentVolumeClaim:
+            claimName: consumer-data-pvc

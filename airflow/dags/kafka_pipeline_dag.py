@@ -10,7 +10,7 @@ default_args = {
 with DAG(
     dag_id="kafka_ecommerce_pipeline",
     default_args=default_args,
-    schedule=None,
+    schedule="*/5 * * * *",
     catchup=False,
     description="Generate analytics report"
 ) as dag:

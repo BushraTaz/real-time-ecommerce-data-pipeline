@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS dim_products (
 
 CREATE TABLE IF NOT EXISTS fact_events (
     id SERIAL PRIMARY KEY,
+    event_id VARCHAR(255) UNIQUE NOT NULL,
     user_id INTEGER,
     product_id INTEGER,
     event_type VARCHAR(50),

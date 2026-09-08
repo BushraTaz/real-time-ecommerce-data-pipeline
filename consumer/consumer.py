@@ -33,8 +33,8 @@ db_pool = psycopg2.pool.SimpleConnectionPool(
     database="airflow",
     user="airflow",
     password="airflow",
-    host="localhost",
-    port="5433"
+    host="postgres",
+    port="5432"
 )
 
 # -------------------------
@@ -42,12 +42,11 @@ db_pool = psycopg2.pool.SimpleConnectionPool(
 # -------------------------
 consumer = KafkaConsumer(
     'ecommerce-events',
-    bootstrap_servers='localhost:9092',
+    bootstrap_servers='kafka:29092',
     auto_offset_reset='earliest',
     enable_auto_commit=False,
     group_id='ecommerce-consumer-group',
-    value_deserializer=lambda x: json.loads(x.decode('utf-8'))
-)
+value_deserializer=lambda x: x.decode('utf-8'))
 
 logger.info("🚀 Enterprise consumer running...")
 
@@ -79,7 +78,12 @@ def send_to_dlq(event, error):
 # -------------------------
 def process_event(message):
 
-    event = message.value
+    try:
+        event = json.loads(message.value)
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON message: {message.value!r} | Error: {e}")
+        metrics["failed"] += 1
+        return
     conn = None
     cursor = None
 

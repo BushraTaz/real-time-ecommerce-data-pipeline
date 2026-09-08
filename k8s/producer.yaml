@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-producer
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-producer
+  template:
+    metadata:
+      labels:
+        app: ecommerce-producer
+    spec:
+      containers:
+        - name: producer
+          image: ecommerce-producer:1.2
+          imagePullPolicy: IfNotPresent

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      containers:
+        - name: airflow
+          image: ecommerce-airflow:1.0
+          command:
+            - airflow
+            - standalone
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-db-secret
+                  key: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: "SequentialExecutor"
+
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+
+          

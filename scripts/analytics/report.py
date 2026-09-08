@@ -5,8 +5,8 @@ conn = psycopg2.connect(
     database="airflow",
     user="airflow",
     password="airflow",
-    host="localhost",
-    port="5433"
+    host="postgres",
+    port="5432"
 )
 
 cursor = conn.cursor()
@@ -38,6 +38,11 @@ for row in rows:
         INSERT INTO fact_product_analytics
         (product_name, category, total_events, last_updated)
         VALUES (%s, %s, %s, %s)
+        ON CONFLICT (product_name)
+        DO UPDATE SET
+            category = EXCLUDED.category,
+            total_events = EXCLUDED.total_events,
+            last_updated = EXCLUDED.last_updated
     """, (
         product_name,
         category,
@@ -47,7 +52,7 @@ for row in rows:
 
 conn.commit()
 
-print("✅ Analytics table updated")
+print("Analytics table updated")
 
 cursor.close()
 conn.close()
