@@ -177,7 +177,7 @@ try:
     for message in consumer:
         if process_event(message):
             partition = TopicPartition(message.topic, message.partition)
-            next_offset = OffsetAndMetadata(message.offset + 1, "")
+            next_offset = OffsetAndMetadata(message.offset + 1, "", -1)
             consumer.commit({partition: next_offset})
         else:
             logger.error(
